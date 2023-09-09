@@ -5,6 +5,10 @@
     font-family: Verdana, sans-serif;
 }
 
+html {
+    font-size: 10px;
+}
+
 body {
     height: 100vh;
     display: flex;

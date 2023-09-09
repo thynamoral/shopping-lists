@@ -5,6 +5,8 @@ const filter = document.getElementById("filter");
 const clear = document.getElementById("clear");
 const lists = document.getElementById("lists");
 
+const item_data = []
+
 // Add button
 add.addEventListener("click",(event) => {
     event.preventDefault();
@@ -13,10 +15,13 @@ add.addEventListener("click",(event) => {
         alert("Invalid item!");
     }
     else {
+        item_data.push(item.value);
         // item values in the lists
         let list = document.createElement("p");
-        list.innerHTML = item.value;
-        list.classList.add("list-item");
+        for(i of item_data) {
+            list.innerHTML = i;
+            list.classList.add("list-item");
+        }
 
         // add delete button
         let delete_list = document.createElement("span");
@@ -29,7 +34,7 @@ add.addEventListener("click",(event) => {
         // delete the item
         delete_list.addEventListener("click",() => {
             list.remove();
-        })
+        });
 
         item.value = "";
     }
@@ -46,5 +51,22 @@ clear.addEventListener("click",(event) => {
     event.preventDefault();
     clearLists(lists);
 })
+
+// Filter button
+// Filter input
+filter.addEventListener("input", () => {
+    const filterValue = filter.value.toLowerCase();
+    const listItems = lists.querySelectorAll(".list-item");
+
+    listItems.forEach((listItem) => {
+        const itemText = listItem.textContent.toLowerCase();
+        if (itemText.includes(filterValue)) {
+            listItem.style.display = "block"; // Show matching items
+        } else {
+            listItem.style.display = "none"; // Hide non-matching items
+        }
+    });
+});
+
 
 
