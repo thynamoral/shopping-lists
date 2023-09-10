@@ -1,72 +1,104 @@
-// Get elements's id from html
-const item = document.getElementById("item");
-const add = document.getElementById("add");
-const filter = document.getElementById("filter");
-const clear = document.getElementById("clear");
+// Get elements IDs
+const form = document.querySelector("form");
+const itemInput = document.getElementById("item");
+const addButton = document.getElementById("add");
+const filterInput = document.getElementById("filter");
+const clearButton = document.getElementById("clear");
 const lists = document.getElementById("lists");
 
-const item_data = []
+const itemData = JSON.parse(localStorage.getItem("itemData")) || [];
+ 
+// Function to add new item to the list
+function addItem() {
+    let newItem = itemInput.value;
+    itemData.push({
+        item:newItem
+    });
 
-// Add button
-add.addEventListener("click",(event) => {
-    event.preventDefault();
+    // Update newItem to localStorage
+    storeItem();
+    // Create items
+    createItem(newItem);
 
-    if(!item.value) {
-        alert("Invalid item!");
-    }
-    else {
-        item_data.push(item.value);
-        // item values in the lists
-        let list = document.createElement("p");
-        for(i of item_data) {
-            list.innerHTML = i;
-            list.classList.add("list-item");
-        }
+    // Clear itemInput to ""
+    itemInput.value = ""
+}
 
-        // add delete button
-        let delete_list = document.createElement("span");
-        delete_list.innerHTML = "x";
-        delete_list.classList.add("delete-style");
-        list.appendChild(delete_list);
-        // append item values and delete button into lists
-        lists.appendChild(list);
+// Function to store data in localStorage WebAPI
+function storeItem() {
+    localStorage.setItem("itemData",JSON.stringify(itemData));
+}
 
-        // delete the item
-        delete_list.addEventListener("click",() => {
-            list.remove();
+// Function to create new data to the #lists div
+function createItem(data) {
+    const newElement = document.createElement("p");
+    const newDeleteButton = document.createElement("span");
+
+    newElement.textContent = data;
+    newDeleteButton.textContent = "x";
+
+    newElement.classList.add("list-item");
+    newDeleteButton.classList.add("delete-style");
+
+    newElement.appendChild(newDeleteButton);
+    lists.appendChild(newElement);
+
+    // Handle delete the data when clicking on "x"
+    newDeleteButton.addEventListener("click",function() {
+        newElement.remove();
+        itemData.forEach(function(value,index) {
+            if(value.item === data) {
+                itemData.splice(index,1);
+                storeItem(); // Update localStorage after remove an item
+            }
         });
+    });
 
-        item.value = "";
-    }
+    // Detect filter input
+    filterInput.addEventListener("input",function(event) {
+        event.preventDefault();
+        let query = filterInput.value;
+        let filterText = newElement.textContent;
+        const filteredItem = filterText.substring(0,filterText.length-1);
+        if(filteredItem.includes(query)) {
+            newElement.style.display = "block";
+        }
+        else {
+            newElement.style.display = "none";
+        }
+    })
+}
+
+// Function to clear all data in the list
+function clearAll() {
+    // Empty #lists div
+    lists.innerHTML = "";
+    // Remove all elements from itemData to []
+    itemData.length = 0;
+    storeItem(); // Update localStorage after clearing all items
+}
+
+// Detect clicking add button
+addButton.addEventListener("click",function(event) {
+    event.preventDefault();
+    addItem();
 })
 
-// Clear function
-function clearLists(parent) {
-    while(parent.firstChild) {
-        parent.removeChild(parent.firstChild);
+// Detect clicking clear button
+clearButton.addEventListener("click",function(event) {
+    event.preventDefault();
+    clearAll();
+})
+
+
+
+// Initialize create elements for old items
+function initalizeOldItems() {
+    if(itemData.length > 0) {
+        itemData.forEach(function(item) {
+            createItem(item.item);
+        });
     }
 }
-// Clear button
-clear.addEventListener("click",(event) => {
-    event.preventDefault();
-    clearLists(lists);
-})
-
-// Filter button
-// Filter input
-filter.addEventListener("input", () => {
-    const filterValue = filter.value.toLowerCase();
-    const listItems = lists.querySelectorAll(".list-item");
-
-    listItems.forEach((listItem) => {
-        const itemText = listItem.textContent.toLowerCase();
-        if (itemText.includes(filterValue)) {
-            listItem.style.display = "block"; // Show matching items
-        } else {
-            listItem.style.display = "none"; // Hide non-matching items
-        }
-    });
-});
-
-
-
+// Call function to initialize old items
+initalizeOldItems();
